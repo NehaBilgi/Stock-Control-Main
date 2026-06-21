@@ -29,7 +29,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build Inventory App
-        run: pnpm --filter inventory-app run build
+        run: pnpm --filter inventory-app exec vite build --base=/Stock-Control-Main/
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload Artifact
