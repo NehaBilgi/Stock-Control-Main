@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 export default defineConfig({
-  base: "/Stock-Control-Main/",
+  base: "./",
   plugins: [
     react(),
     tailwindcss()],
@@ -19,6 +19,5 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist"), // Simplified output location for GitHub Pages runner
     emptyOutDir: true,
-    assetsDir: "assests",
   },
 });
