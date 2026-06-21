@@ -27,7 +27,7 @@ jobs:
         with:
           version: 9
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
       - name: Build Inventory App
         run: pnpm --filter inventory-app run build
       - name: Setup Pages
