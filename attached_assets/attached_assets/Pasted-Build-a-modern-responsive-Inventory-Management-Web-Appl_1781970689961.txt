@@ -1,0 +1,175 @@
+Build a modern, responsive Inventory Management Web Application for industrial maintenance consumables such as grease, lubricants, oils, belts, bearings, filters, spare parts, tools, and other maintenance materials.
+
+Core Requirements
+
+Create a web-based application with barcode scanning capability that allows users to:
+
+1. Scan product barcodes using a mobile phone camera or USB barcode scanner.
+2. Automatically retrieve and update product information.
+3. Track stock movement in real time.
+4. Manage inventory across multiple locations/stores.
+5. Generate reports and dashboards.
+
+Product Master Fields
+
+Include the following columns:
+
+* Product ID (Auto Generated)
+* Barcode / QR Code
+* Product Name
+* Product Category
+* Brand
+* Manufacturer
+* Product Description
+* Unit of Measure (Nos, Kg, Litre, Meter, Box, etc.)
+* Part Number
+* Vendor/Supplier Name
+* Storage Location
+* Rack Number
+* Bin Number
+* Minimum Stock Level
+* Maximum Stock Level
+* Reorder Level
+* Current Stock
+* Available Stock
+* Reserved Stock
+* Unit Cost
+* Total Inventory Value
+* Purchase Date
+* Manufacturing Date
+* Expiry Date (if applicable)
+* Last Issued Date
+* Last Received Date
+* Warranty Expiry
+* Product Image
+* Status (Active/Inactive)
+
+Inventory Transaction Fields
+
+Track:
+
+* Transaction ID
+* Product Barcode
+* Product Name
+* Stock In Quantity
+* Stock Out Quantity
+* Balance Quantity
+* Transaction Date
+* Transaction Time
+* Issued To
+* Department
+* Employee Name
+* Work Order Number
+* Purpose of Use
+* Remarks
+* Approved By
+
+Barcode Scanning Features
+
+* Mobile camera barcode scanning.
+* QR code support.
+* Instant stock lookup.
+* Auto-fill product details after scan.
+* Quick stock issue and stock receipt process.
+* Offline scan queue with sync when internet is available.
+
+Dashboard
+
+Show:
+
+* Total Products
+* Total Inventory Value
+* Items In Stock
+* Out of Stock Items
+* Low Stock Items
+* Expiring Products
+* Recent Transactions
+* Top Consumed Items
+* Monthly Consumption Trends
+* Inventory Turnover Rate
+
+Alerts & Notifications
+
+* Low Stock Alert
+* Out of Stock Alert
+* Reorder Alert
+* Expiry Alert
+* Warranty Expiry Alert
+
+Reports
+
+Generate:
+
+* Stock Summary Report
+* Stock Movement Report
+* Consumption Report
+* Purchase Report
+* Vendor Report
+* Low Stock Report
+* Audit Trail Report
+* Monthly Inventory Report
+
+Allow export to:
+
+* Excel
+* CSV
+* PDF
+
+User Roles
+
+1. Admin
+2. Inventory Manager
+3. Store Keeper
+4. Auditor
+5. Read-Only User
+
+Search & Filters
+
+Search by:
+
+* Barcode
+* Product Name
+* Category
+* Brand
+* Supplier
+* Purchase Date
+* Expiry Date
+* Location
+
+Technology Requirements
+
+* Modern responsive UI
+* Mobile friendly
+* Dark and Light mode
+* Role-based authentication
+* PostgreSQL database
+* REST API architecture
+* Audit logging for every transaction
+* Barcode generation and printing support
+* Secure login and password encryption
+
+Additional Features
+
+* Multi-location inventory management
+* Bulk Excel import/export
+* Product image upload
+* Inventory forecasting using historical consumption
+* Stock reconciliation module
+* Physical stock count module
+* Maintenance spare-parts tracking
+* Asset linkage (which machine used which spare part)
+* Complete audit trail with timestamps
+
+Deliverables
+
+Generate:
+
+* Complete web application
+* Database schema
+* API documentation
+* Installation guide
+* Sample data
+* Responsive dashboard
+* Production-ready code
+
+The application should have a professional enterprise look similar to SAP, Oracle Inventory, or ServiceNow Asset Management and be suitable for manufacturing plants, warehouses, and maintenance departments.

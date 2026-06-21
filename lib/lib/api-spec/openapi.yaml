@@ -1,0 +1,1436 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Industrial Inventory Management System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: products
+    description: Product master management
+  - name: categories
+    description: Product categories
+  - name: locations
+    description: Storage locations
+  - name: transactions
+    description: Inventory transactions (stock in/out)
+  - name: equipment
+    description: Equipment / machine asset register
+  - name: dashboard
+    description: Dashboard summary and analytics
+  - name: alerts
+    description: Stock alerts and notifications
+  - name: reports
+    description: Reporting endpoints
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  # Categories
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    patch:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Locations
+  /locations:
+    get:
+      operationId: listLocations
+      tags: [locations]
+      summary: List all locations
+      responses:
+        "200":
+          description: List of locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Location"
+    post:
+      operationId: createLocation
+      tags: [locations]
+      summary: Create a location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+
+  /locations/{id}:
+    patch:
+      operationId: updateLocation
+      tags: [locations]
+      summary: Update a location
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+    delete:
+      operationId: deleteLocation
+      tags: [locations]
+      summary: Delete a location
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Products
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products with filters and pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: locationId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+        - name: stockStatus
+          in: query
+          schema:
+            type: string
+            enum: [in_stock, low_stock, out_of_stock]
+        - name: brand
+          in: query
+          schema:
+            type: string
+        - name: supplier
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/barcode/{barcode}:
+    get:
+      operationId: getProductByBarcode
+      tags: [products]
+      summary: Lookup product by barcode (for scanning)
+      parameters:
+        - name: barcode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Transactions
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List transactions with filters
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: productId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [stock_in, stock_out]
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Create a stock transaction (in or out)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionInput"
+      responses:
+        "201":
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/{id}:
+    get:
+      operationId: getTransaction
+      tags: [transactions]
+      summary: Get a transaction by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  # Equipment
+  /equipment:
+    get:
+      operationId: listEquipment
+      tags: [equipment]
+      summary: List all equipment
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, under_maintenance, decommissioned]
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EquipmentItem"
+    post:
+      operationId: createEquipment
+      tags: [equipment]
+      summary: Create equipment record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EquipmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EquipmentItem"
+
+  /equipment/{id}:
+    get:
+      operationId: getEquipment
+      tags: [equipment]
+      summary: Get equipment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Equipment item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EquipmentItem"
+    put:
+      operationId: updateEquipment
+      tags: [equipment]
+      summary: Update equipment record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EquipmentInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EquipmentItem"
+    delete:
+      operationId: deleteEquipment
+      tags: [equipment]
+      summary: Delete equipment record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /equipment/{id}/history:
+    get:
+      operationId: getEquipmentHistory
+      tags: [equipment]
+      summary: Get maintenance / part-usage history for a machine
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of transactions linked to this equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  # Dashboard & Analytics
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent-transactions:
+    get:
+      operationId: getRecentTransactions
+      tags: [dashboard]
+      summary: Get recent transactions for dashboard
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Recent transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /dashboard/top-consumed:
+    get:
+      operationId: getTopConsumedProducts
+      tags: [dashboard]
+      summary: Get top consumed products
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Top consumed products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopConsumedItem"
+
+  /dashboard/monthly-consumption:
+    get:
+      operationId: getMonthlyConsumption
+      tags: [dashboard]
+      summary: Get monthly consumption trend data
+      parameters:
+        - name: months
+          in: query
+          schema:
+            type: integer
+            default: 6
+      responses:
+        "200":
+          description: Monthly consumption data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyConsumption"
+
+  /dashboard/category-breakdown:
+    get:
+      operationId: getCategoryBreakdown
+      tags: [dashboard]
+      summary: Get inventory value by category
+      responses:
+        "200":
+          description: Category breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryBreakdown"
+
+  # Alerts
+  /alerts:
+    get:
+      operationId: listAlerts
+      tags: [alerts]
+      summary: List active alerts
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [low_stock, out_of_stock, reorder, expiry, warranty_expiry]
+      responses:
+        "200":
+          description: Active alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+
+  # Reports
+  /reports/stock-summary:
+    get:
+      operationId: getStockSummaryReport
+      tags: [reports]
+      summary: Get stock summary report
+      parameters:
+        - name: locationId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: categoryId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Stock summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockSummaryRow"
+
+  /reports/stock-movement:
+    get:
+      operationId: getStockMovementReport
+      tags: [reports]
+      summary: Get stock movement report
+      parameters:
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+        - name: productId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Stock movement data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockMovementRow"
+
+  /reports/low-stock:
+    get:
+      operationId: getLowStockReport
+      tags: [reports]
+      summary: Get low stock report
+      responses:
+        "200":
+          description: Low stock items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LowStockRow"
+
+  /reports/expiry:
+    get:
+      operationId: getExpiryReport
+      tags: [reports]
+      summary: Get expiry report
+      parameters:
+        - name: daysAhead
+          in: query
+          schema:
+            type: integer
+            default: 90
+      responses:
+        "200":
+          description: Expiring products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExpiryRow"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user, token]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+
+    User:
+      type: object
+      required: [id, username, name, role]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, inventory_manager, store_keeper, auditor, read_only]
+
+    Category:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        productCount:
+          type: integer
+
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Location:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        productCount:
+          type: integer
+
+    LocationInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    LocationUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Product:
+      type: object
+      required: [id, productId, name, categoryId, unitOfMeasure, currentStock, availableStock, status]
+      properties:
+        id:
+          type: integer
+        productId:
+          type: string
+          description: Auto-generated product ID like PRD-00001
+        barcode:
+          type: ["string", "null"]
+        name:
+          type: string
+        categoryId:
+          type: ["integer", "null"]
+        categoryName:
+          type: ["string", "null"]
+        brand:
+          type: ["string", "null"]
+        manufacturer:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        unitOfMeasure:
+          type: string
+        partNumber:
+          type: ["string", "null"]
+        supplier:
+          type: ["string", "null"]
+        locationId:
+          type: ["integer", "null"]
+        locationName:
+          type: ["string", "null"]
+        rackNumber:
+          type: ["string", "null"]
+        binNumber:
+          type: ["string", "null"]
+        minStockLevel:
+          type: number
+        maxStockLevel:
+          type: ["number", "null"]
+        reorderLevel:
+          type: number
+        currentStock:
+          type: number
+        availableStock:
+          type: number
+        reservedStock:
+          type: number
+        unitCost:
+          type: number
+        totalValue:
+          type: number
+        purchaseDate:
+          type: ["string", "null"]
+        manufacturingDate:
+          type: ["string", "null"]
+        expiryDate:
+          type: ["string", "null"]
+        lastIssuedDate:
+          type: ["string", "null"]
+        lastReceivedDate:
+          type: ["string", "null"]
+        warrantyExpiry:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        stockStatus:
+          type: string
+          enum: [in_stock, low_stock, out_of_stock]
+
+    ProductInput:
+      type: object
+      required: [name, unitOfMeasure]
+      properties:
+        barcode:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type: integer
+        brand:
+          type: string
+        manufacturer:
+          type: string
+        description:
+          type: string
+        unitOfMeasure:
+          type: string
+        partNumber:
+          type: string
+        supplier:
+          type: string
+        locationId:
+          type: integer
+        rackNumber:
+          type: string
+        binNumber:
+          type: string
+        minStockLevel:
+          type: number
+        maxStockLevel:
+          type: number
+        reorderLevel:
+          type: number
+        currentStock:
+          type: number
+        unitCost:
+          type: number
+        purchaseDate:
+          type: string
+        manufacturingDate:
+          type: string
+        expiryDate:
+          type: string
+        warrantyExpiry:
+          type: string
+        imageUrl:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+    ProductUpdate:
+      type: object
+      properties:
+        barcode:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type: ["integer", "null"]
+        brand:
+          type: string
+        manufacturer:
+          type: string
+        description:
+          type: string
+        unitOfMeasure:
+          type: string
+        partNumber:
+          type: string
+        supplier:
+          type: string
+        locationId:
+          type: ["integer", "null"]
+        rackNumber:
+          type: string
+        binNumber:
+          type: string
+        minStockLevel:
+          type: number
+        maxStockLevel:
+          type: number
+        reorderLevel:
+          type: number
+        unitCost:
+          type: number
+        purchaseDate:
+          type: string
+        manufacturingDate:
+          type: string
+        expiryDate:
+          type: string
+        warrantyExpiry:
+          type: string
+        imageUrl:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+    ProductList:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    Transaction:
+      type: object
+      required: [id, transactionId, productId, type, quantity, balanceQuantity, transactionDate]
+      properties:
+        id:
+          type: integer
+        transactionId:
+          type: string
+          description: Auto-generated TXN-00001
+        productId:
+          type: integer
+        productName:
+          type: string
+        barcode:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [stock_in, stock_out]
+        quantity:
+          type: number
+        balanceQuantity:
+          type: number
+        transactionDate:
+          type: string
+        vehicleNumber:
+          type: ["string", "null"]
+        issuedTo:
+          type: ["string", "null"]
+        department:
+          type: ["string", "null"]
+        employeeName:
+          type: ["string", "null"]
+        workOrderNumber:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+        remarks:
+          type: ["string", "null"]
+        approvedBy:
+          type: ["string", "null"]
+        equipmentId:
+          type: ["integer", "null"]
+        equipmentAssetTag:
+          type: ["string", "null"]
+        equipmentName:
+          type: ["string", "null"]
+        maintenanceNotes:
+          type: ["string", "null"]
+        createdBy:
+          type: ["string", "null"]
+
+    TransactionInput:
+      type: object
+      required: [productId, type, quantity]
+      properties:
+        productId:
+          type: integer
+        type:
+          type: string
+          enum: [stock_in, stock_out]
+        quantity:
+          type: number
+        transactionDate:
+          type: string
+        vehicleNumber:
+          type: string
+        issuedTo:
+          type: string
+        department:
+          type: string
+        employeeName:
+          type: string
+        workOrderNumber:
+          type: string
+        purpose:
+          type: string
+        remarks:
+          type: string
+        approvedBy:
+          type: string
+        equipmentId:
+          type: integer
+        maintenanceNotes:
+          type: string
+
+    EquipmentItem:
+      type: object
+      required: [id, assetTag, name, status, createdAt]
+      properties:
+        id:
+          type: integer
+        assetTag:
+          type: string
+        name:
+          type: string
+        type:
+          type: ["string", "null"]
+        department:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        manufacturer:
+          type: ["string", "null"]
+        model:
+          type: ["string", "null"]
+        serialNumber:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, under_maintenance, decommissioned]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    EquipmentInput:
+      type: object
+      required: [assetTag, name]
+      properties:
+        assetTag:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        department:
+          type: string
+        location:
+          type: string
+        manufacturer:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        status:
+          type: string
+          enum: [active, under_maintenance, decommissioned]
+        notes:
+          type: string
+
+    TransactionList:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    DashboardStats:
+      type: object
+      required: [totalProducts, totalValue, inStockCount, outOfStockCount, lowStockCount, expiringCount, totalTransactionsToday]
+      properties:
+        totalProducts:
+          type: integer
+        totalValue:
+          type: number
+        inStockCount:
+          type: integer
+        outOfStockCount:
+          type: integer
+        lowStockCount:
+          type: integer
+        expiringCount:
+          type: integer
+        totalTransactionsToday:
+          type: integer
+        inventoryTurnoverRate:
+          type: number
+
+    TopConsumedItem:
+      type: object
+      required: [productId, productName, totalConsumed, unitOfMeasure]
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        totalConsumed:
+          type: number
+        unitOfMeasure:
+          type: string
+        categoryName:
+          type: ["string", "null"]
+
+    MonthlyConsumption:
+      type: object
+      required: [month, year, totalStockIn, totalStockOut]
+      properties:
+        month:
+          type: integer
+        year:
+          type: integer
+        label:
+          type: string
+        totalStockIn:
+          type: number
+        totalStockOut:
+          type: number
+
+    CategoryBreakdown:
+      type: object
+      required: [categoryName, totalValue, productCount]
+      properties:
+        categoryName:
+          type: string
+        totalValue:
+          type: number
+        productCount:
+          type: integer
+
+    Alert:
+      type: object
+      required: [id, type, productId, productName, message, severity]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [low_stock, out_of_stock, reorder, expiry, warranty_expiry]
+        productId:
+          type: integer
+        productName:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+          enum: [critical, warning, info]
+        currentStock:
+          type: ["number", "null"]
+        threshold:
+          type: ["number", "null"]
+        expiryDate:
+          type: ["string", "null"]
+
+    StockSummaryRow:
+      type: object
+      required: [productId, productName, currentStock, unitOfMeasure, totalValue, status]
+      properties:
+        productId:
+          type: string
+        productName:
+          type: string
+        categoryName:
+          type: ["string", "null"]
+        locationName:
+          type: ["string", "null"]
+        currentStock:
+          type: number
+        availableStock:
+          type: number
+        reservedStock:
+          type: number
+        unitOfMeasure:
+          type: string
+        unitCost:
+          type: number
+        totalValue:
+          type: number
+        stockStatus:
+          type: string
+        status:
+          type: string
+
+    StockMovementRow:
+      type: object
+      required: [transactionId, productName, type, quantity, balanceQuantity, transactionDate]
+      properties:
+        transactionId:
+          type: string
+        productName:
+          type: string
+        barcode:
+          type: ["string", "null"]
+        type:
+          type: string
+        quantity:
+          type: number
+        balanceQuantity:
+          type: number
+        transactionDate:
+          type: string
+        department:
+          type: ["string", "null"]
+        issuedTo:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+
+    LowStockRow:
+      type: object
+      required: [productId, productName, currentStock, minStockLevel, reorderLevel, unitOfMeasure]
+      properties:
+        productId:
+          type: string
+        productName:
+          type: string
+        categoryName:
+          type: ["string", "null"]
+        supplier:
+          type: ["string", "null"]
+        locationName:
+          type: ["string", "null"]
+        currentStock:
+          type: number
+        minStockLevel:
+          type: number
+        reorderLevel:
+          type: number
+        unitOfMeasure:
+          type: string
+        stockStatus:
+          type: string
+
+    ExpiryRow:
+      type: object
+      required: [productId, productName, expiryDate, daysUntilExpiry]
+      properties:
+        productId:
+          type: string
+        productName:
+          type: string
+        categoryName:
+          type: ["string", "null"]
+        locationName:
+          type: ["string", "null"]
+        expiryDate:
+          type: string
+        warrantyExpiry:
+          type: ["string", "null"]
+        daysUntilExpiry:
+          type: integer
+        currentStock:
+          type: number
+        unitOfMeasure:
+          type: string
